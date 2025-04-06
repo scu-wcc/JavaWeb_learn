@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOM对象</title>
+</head>
+<body>
+
+    <script>
+        //window对象
+        window.alert("弹窗")
+        var result = window.confirm("是否删除？")//提示栏
+        alert(result)
+        
+        //window方法
+        var count=0;
+        //周期性执行函数
+/*         window.setInterval(function(){
+            count++
+            console.log(count);
+        },2000) */
+
+        //只执行一次
+        window.setTimeout(function(){
+            count++
+            console.log(count);
+        },2000)
+
+        //获取location对象
+        var local = window.location
+        //获取当前网页地址栏地址
+        alert(local)
+        //设置其他url可以直接跳转
+        local.href = "https://www.baidu.com"
+
+    </script>
+
+</body>
+</html>

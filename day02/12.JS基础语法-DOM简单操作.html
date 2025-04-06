@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOM对象</title>
+
+    <style>
+        span{
+            color: red;
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <img id="h1" src="img/off.gif" />
+
+    <div class="cls">
+        传智教育
+    </div>
+
+    <div class="cls">
+        黑马程序员
+    </div>
+
+    <input type="checkbox" name="hobby">电影
+    <input type="checkbox" name="hobby">旅游
+    <input type="checkbox" name="hobby">运动
+
+
+
+    <script>
+        // 获取div标签中的内容，追加红色very good
+        var divs = document.getElementsByTagName("div")
+
+        for (let i = 0; i < divs.length; i++) {
+            const div = divs[i];
+            var str=div.innerHTML
+            div.innerHTML = str+ "<span>very good</span>"
+        }
+
+        //将图片展示换成发光的
+        var img = document.getElementById("h1")
+        img.src = "img/on.gif"
+
+        //将多选框全部变成选择状态
+        var checkboxs = document.getElementsByName("hobby")
+        for (let i = 0; i < checkboxs.length; i++) {
+            const box = checkboxs[i];
+            box.checked = true
+        }
+
+    </script>
+
+</body>
+</html>

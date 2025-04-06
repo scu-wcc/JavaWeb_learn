@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小案例</title>
+
+
+</head>
+<body>
+    <img src="img/off.gif" id="light" ><br>
+    <input type="button" value="点亮" id="bt1"  >
+    <input type="button" value="熄灭" id="bt2"   >
+    <br><br>
+    
+    <input type="text"  id="name"  value="ITCAST"  onfocus="lower()" onblur="upper()">
+    <br><br>
+    <input type="checkbox" name="hobby" value="1" >旅游
+    <input type="checkbox" name="hobby" value="2" >电影
+    <input type="checkbox" name="hobby" value="3" >游戏
+    <br>
+    <input type="button" value="全选" onclick="clicked()">
+    <input type="button" value="全不选" onclick="unClicked()">
+
+
+
+    
+
+
+
+</body>
+
+<script>
+
+    document.getElementById("bt1").onclick=function(){
+        document.getElementById("light").src="img/on.gif"
+    }
+
+    document.getElementById("bt2").onclick=function(){
+        document.getElementById("light").src="img/off.gif"
+    }
+
+    function upper(){
+        var text = document.getElementById("name")
+        text.value = text.value.toUpperCase()
+        
+    }
+
+
+    function lower(){
+        var text =document.getElementById("name");
+        text.value = text.value.toLowerCase()
+
+    }
+
+    function clicked(){
+        var hobbies= document.getElementsByName("hobby")
+        hobbies.forEach((hobby) => { hobby.checked = true})
+    }
+    function unClicked(){
+        var hobbies= document.getElementsByName("hobby")
+        hobbies.forEach((hobby) => { hobby.checked = false})
+    }
+
+
+</script>
+
+
+
+</html>

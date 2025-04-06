@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事件绑定</title>
+
+
+</head>
+<body>
+
+
+    <input type="button" value="绑定事件1" id="bt1" onclick="on()">
+
+    <input type="button" value="绑定事件2" id="bt2">
+
+    
+
+
+
+</body>
+
+<script>
+        function on(){
+            alert("绑定事件1被点击了")
+        }
+
+        // 第二种绑定形式
+        document.getElementById("bt2").onclick = function(){
+            alert("绑定事件2被点击了")
+        }
+
+
+</script>
+
+
+
+</html>

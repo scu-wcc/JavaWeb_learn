@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON</title>
+</head>
+<body>
+
+    <script>
+/*         var user ={
+            name: "Tom",
+            age: 23,
+            gender: "male",
+
+             eat: function(){
+                alert(user.name+"吃饭")
+            } 
+           eat(){
+            alert(user.name+"正在吃饭")
+           }
+        }
+
+        alert(user.name)
+        user.eat() */
+
+
+    var myJSON = '{ "name":"Tom", "age":18, "address":["北京","上海","南京"]}'
+    alert(myJSON)    
+    alert(myJSON.name) // undefined    
+
+    // 将JSON转换为对象
+    var myObj =  JSON.parse(myJSON)
+    alert(myObj) // object Object
+    alert(myObj.name) //Tom
+
+    // 将对象转换成JSON
+    var toJSON =   JSON.stringify(myObj)
+    alert(toJSON)
+
+    var user ={
+            name: "JACK",
+            age: 23,
+            gender: "male",
+           eat(){
+            alert(user.name+"正在吃饭")
+           }
+        }
+
+        alert(JSON.stringify(user))
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>常用指令</title>
+</head>
+<script src="js/vue.js"></script>
+
+<body>
+    <div id="app">
+        <a v-bind:href="url" target="_blank"> 绑定方式1 </a>
+        <a :href="url" target="_blank"> 绑定方式2 </a>
+        <br>
+        <input type="text" v-model="url">
+        <br>
+        <input type="button" v-on:click="handle()" value="点击">
+        <input type="button" @click="handle" value="按钮2">
+
+    </div>
+
+
+
+</body>
+
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+            url:"https://www.baidu.com"
+        },
+        methods:{
+            handle:function(){
+                alert("你点击了我一下......");
+            }
+        }
+    })
+
+
+</script>
+
+
+
+</html>
