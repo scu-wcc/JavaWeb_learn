@@ -219,7 +219,9 @@ Vue框架: view-model-viewmodel模型。
 	v-for="(item, index) in items"; items为data中的数组，item为临时变量，index可有可无，为索引。
 	
 	
-Vue的生命周期:一共有八个阶段。	
+Vue的生命周期:一共有八个阶段，每个生命周期都有其对应的自动执行的生命周期方法(钩子方法)
+
+	生命周期方法与methods、data平级，在Vue到达相应的生命周期阶段时自动执行
 	
 	
 	
