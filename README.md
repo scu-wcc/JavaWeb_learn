@@ -207,6 +207,7 @@ Vue框架: view-model-viewmodel模型。
 		data: {......}, 该Vue的数据模型
 		methods: { ...... }, 该Vue的函数模型
 	3. 插值表达式：{{ }}
+	4.可以使用this.name来调用该Vue的data中的name数据。
 		
 常用指令:
 	
@@ -223,14 +224,83 @@ Vue的生命周期:一共有八个阶段，每个生命周期都有其对应的�
 
 	生命周期方法与methods、data平级，在Vue到达相应的生命周期阶段时自动执行
 	
+7.Ajox-Axios：异步请求
 	
+	由于原生Ajox的繁琐性，已经被逐步淘汰，可以使用其封装类来简化操作
+	-Axios: 需要导包
+		完整写法:
+			function name(){
+			axios({
+				method:"",
+				url:""
+				[data:"",]
+				[confing:"",]
+				
+				//回调函数，用于处理得到的数据。result为返回的数据
+			}).then(result =>{方法体})
+			}
+		简化写法:
+		function name(){
+			axios.get/delete/post/put(url [,data [,config]]).then(result => {方法体})   
+		}  
+
+前后端分离: 需求分析->API接口文档->并行开发->分离测试->联调测试	
+
+8.使用Vue工程化开发。
+
+创建的Vue项目具有热部署的性质: 修改的内容实时映射到浏览器页面上，不需要刷新页面。	
+
+		1.配置NodeJS环境，导入vue/cli脚手架。
+		2.创建vue项目(使用命令行/图像UI)
+		3.在VSCode中导入创建好的Vue项目:
+			node_modules: 项目依赖包
+			public: 项目静态文件
+			src: 项目源码
+			package.json: 模型基本信息，项目模块，版本信息
+			vue.config.js: vue配置
+			......
+		4.启动Vue项目
+
+.vue文件:组件文件:
+		 
+	-template：模板，编写HTML代码。
+	-style：控制CSS样式。
+	-script：控制模板的数据来源与行为。
+		使用export default{
+				data: function(){
+				return{
+					message:"要返回的数据"
+					}
+				},
+				method: {
+				 方法
+				}
+			
+			}
+
+自己编写组件时要按照:PascalCase/kebab-case来命名，这样Vue才能正确识别并转换: ElementView->element-view	
+自己编写的vue组件需要在根组件(APP.vue)中使用:<element-view></element-view>导入
+
+9.完整创建一个Vue项目:
 	
+	1.在main.js中导入ElementUI组件
+	2.在src/views中创建自己的组件。
+	3.在src/router/index.js为自己创建的组件配置路由:
+		{
+			path: '/dept', //http://localhost:7000/#/dept; #:URL的哈希
+			name: 'dept',  //该路由的名字
+			component: () => import( '../views/tlias/EmpView.vue') //展示的组件
+		}
+		  
+		{	//配置默认路由
+			path: '/',   //当打开页面时展示根地址
+			redirect: "/dept"  //将根地址重路由到上面定义过的某个地址
+		}
+	4.将根组件(APP.vue)中展示的内容改为:<router-view></router-view>;//根据路由地址展示页面
+	5.为某个组件配置跳转超链接: <router-link to="/dept">xxxx</router-link>; 此时点击xxxx就会跳转到配置好的/dept组件。
+	6.打包和部署:点击build打包当前vue项目到dist文件夹中，导入nginx的http文件夹中，运行nginx，在浏览器输入http://localhost:prot即可访问。
 	
-	
-	
-	
-	
-	
+Vue路由:<img height="200" src="img/Vue路由.png" width="600"/>
 	
 	
 	

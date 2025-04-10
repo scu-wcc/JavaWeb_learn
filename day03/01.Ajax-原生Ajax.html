@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原生Ajax体验</title>
+</head>
+<body>
+    <input type="button" value="按钮" onclick="getData()">
+    <div id="div1">
+
+
+    </div>
+
+
+</body>
+<script>
+    function getData(){
+        //创建XMLHttpRequest
+        var xmlHttpRequest = new XMLHttpRequest();
+
+        //发送异步请求
+        xmlHttpRequest.open('GET','http://127.0.0.1:4523/m1/6177777-5870173-default/users/list')
+        xmlHttpRequest.send();
+
+        //获取服务器端响应数据
+        xmlHttpRequest.onreadystatechange=function(){
+            if(xmlHttpRequest.readyState==4 && xmlHttpRequest.status==200){
+                    document.getElementById("div1").innerHTML=xmlHttpRequest.responseText;
+            }
+        }
+
+
+    }
+
+</script>
+
+</html>

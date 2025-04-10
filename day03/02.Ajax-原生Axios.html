@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajax-Axios体验</title>
+</head>
+
+<!-- 导入axios -->
+<script src="js/axios-0.18.0.js"></script>
+
+<body>
+
+    <input type="button" onclick="get()" value="get请求">
+    <input type="button" onclick="post()" value="post请求">
+
+
+</body>
+<script>
+
+    function get(){
+        axios({
+            method:"get",
+            url:"http://127.0.0.1:4523/m1/6177777-5870173-default/users/list",
+        }).then(result => {
+            console.log(result.data);
+        })
+    }
+
+    function post(){
+        axios({
+            method:"get",
+            url:"http://127.0.0.1:4523/m1/6177777-5870173-default/users/getByID",
+            data: "id=1"
+        }).then(result => {
+            console.log(result.data);
+        })
+    }
+</script>
+
+</html>
