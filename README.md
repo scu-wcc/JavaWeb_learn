@@ -301,6 +301,111 @@ Vue的生命周期:一共有八个阶段，每个生命周期都有其对应的�
 	6.打包和部署:点击build打包当前vue项目到dist文件夹中，导入nginx的http文件夹中，运行nginx，在浏览器输入http://localhost:prot即可访问。
 	
 Vue路由:<img height="200" src="img/Vue路由.png" width="600"/>
+
+10.Maven：管理和构建Java项目的工具。
+
+Maven坐标:
+	
+	-groupId: 当前Maven项目隶属的组织名称
+	-artifactId: 当前Maven项目名称
+	-version: 当前项目的版本号
+	
+依赖管理(Maven核心)：
+
+	1.依赖配置：引入依赖
+
+		1.在pom文件中编写:<dependencies>标签，在这个标签中导入依赖；
+		2.编写<dependency>标签，每个<dependency>都单独管理一个依赖；
+		3.定义坐标的groupId、artifactlId、version；
+		4.点击刷新，引入最新加入的坐标。
+		
+		<dependencies>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>1.2.12</version>
+			</dependency>
+			......
+		</dependencies>
+		
+	2.依赖传递: 直接依赖与间接依赖
+		
+		projectA引入依赖projectB时，会将B所依赖的配置projectC一起导入，此时A也依赖C，A对C是间接依赖，对B是直接依赖。
+		如果不想引入C，此时需要排除依赖: exclusions
+			1.找到引入projectB的<dependency>。
+			2.在标签内部添加：
+				<exclusions>
+					<exclusion>
+						<groupId></groupId>
+						<artifactId><artifactId>
+						//不需要指定版本号
+					</exclusion>
+					......
+				</exclusions>
+
+	3.依赖范围: 引入的依赖可以生效的范围:main文件夹内、test文件夹内、是否参与打包
+
+			-在引入配置时添加<scope>compile(默认值)/test/provided/runtime</scope>标签设置该依赖的作用范围。
+
+	4.生命周期: maven有3套不同的生命周期，每个生命周期都有自己的阶段。
+
+		-clean:清理工作。
+		 default: 核心工作,包括编译、测试、打包、安装(将当前Maven.jar安装到本地仓库)等。
+		 site: 生成报告、发布站点等。
+		
+		※1.在同一套生命周期中执行后面的阶段时，前面的阶段会自动执行，而且是先执行。
+		 2.在IDEA中使用Maven执行相应的生命周期指令(在控制台执行Maven指令同理)时，实际上调用的是相应绑定的插件。
+	
+11.SpringBoot	
+	
+	-controller:请求处理类: @RestController标识
+	
+	-绑定请求路径与请求方法: @RequestMapping(path); 绑定路径与方法
+	
+HTTP数据格式:
+
+	-请求数据格式：
+		-请求行: 请求方式、请求路径、协议。
+		-请求头: 资源信息，以键值对key: value 形式传递。
+		-请求体: POST发起请求时，存放请求参数。
+		
+	-响应数据格式:
+		-响应行: 协议版本、状态码(200\404\500最为常见)、描述
+		-响应头: 资源信息，以键值对key：value 形式传递。
+		-响应体: 存放响应的数据。
+		
+Web服务器(一个软件程序)：对HTTP协议的封装，可以处理和响应客户端发来的请求，使得后端不需要在重复定义服务器类。	
+
+著名的Web服务器:Tomcat：轻量级Web服务器，支持Servlet/JSP等少量的JavaEE规范
+
+SpringBoot的起步依赖内嵌了Tomcat服务器
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
