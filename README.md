@@ -380,32 +380,142 @@ Web服务器(一个软件程序)：对HTTP协议的封装，可以处理和响�
 
 SpringBoot的起步依赖内嵌了Tomcat服务器
 
+12.使用sprintboot接收请求参数
+		
+	1.简单参数:
+		-在对应的方法中添加与参数同名的变量即可接收，并且进行自动的类型转换。
+			GET方法:{
+			http://localhost:8080/simplePara?name=Tom&age=23
+			
+			@RequestMapping("/simplePara")
+			public String getPare(String name, int age)
+			}
+			
+			POST方法{
+			在请求体中使用键值对传递参数
+			
+			@RequestMapping("/simplePara")
+			public String getPare(String name, int age)
+			}
+		当传递参数与形参名不一致，可以使用@RequestParam映射
+		public String getPare(@RequestParam("name", required = false) String username, Integer age)
+			-将"name"映射到username上，同时修改required的值为false: 该"user"参数可以不传递。
 	
 	
+	2.实体参数:使用对象接收参数(以User user为例)
+		1.无嵌套关系接收:对象的成员变量与请求参数名一一对应即可。
+		2.嵌套参数接收:如address.province\address.city
+			-在User类中添加Address类变量address。
+			-创建Address类并添加province和city两个参数
+			
+	3.数组参数:使用数组/集合接收请求参数
+		当传递的请求参数中包含一个key对应多个value时，可以使用同名数组/集合接收
+		{
+		public String getArray(String[] hobby)
+		或者
+		public String getArray(@RequestParam List<String> hobby):使用集合接收时@RequestParam(绑定参数关系)是必须的！
+		}
+	
+	4.时间参数:请求参数为某个格式的时间
+		public String getTime(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime newTime)
+			@DateTimeFormat(pattern = "指定时间格式，只能接收这个格式的时间参数")。
+			newTime：与请求参数同名。
+	
+	5.JSON参数:请求体为JSON数据，使用POJO实体参数接收
+		public String getJSON(@RequestBody User user)
+			@RequestBody:将JSON的数据封装到User中
+			User中的成员变量要与JSON中Key同名，具体要求与实体参数相同。
+
+	6.路径参数:参数是路径的一部分。
+		@RequestMapping("/path/{id}/{name}")
+		public String getPath(@PathVariable Integer id, @PathVariable String name)
+			1.输入的参数必须满足....../path/id/name才会被映射到getPath方法。
+			2.{id}/{name}都是可变参数，可以随着请求路径的改变而改变。
+			3.@PathVariable:将路径参数与方法形参绑定，必须同名。
+
+响应注解:ResponseBody: 作用在Controller类/方法上，将返回值作为响应数据返回给请求端。
+		
+	@RestController = @Controller + @ResponseBody
+	返回结果：String -> String
+			  对象/数组/集合 -> JSON格式
+
+统一响应结果:将要返回的信息封装到同一个类中，统一返回该类对象。
+
+	public class Result {
+		private int code;
+		private String msg;
+		private Object data;
+		......
+		
+		public static Result success/error(){
+		return new Result(code,msg,data);
+		}
+	}
 	
 	
+员工数据案例
+
+	前端:定义整个HTML界面，使用Vue组件定义mounted方法，在页面挂件加载完成后触发axios，传递listEmp访问路径
+		mounted(){
+            axios.get('/listEmp').then(res=>{
+                if(res.data.code){
+                    this.tableData = res.data.data;
+                }
+            });
+        },
 	
+	后端: 在请求处理类中定义方法接收前端的请求
+		@RequestMapping("/listEmp")
+		public Result getEmp(){
+		 ......
+		 return Result.success(list)
+		}
 	
+13.SpringBoot的项目的单一职责原则
+
+    三层架构: 将后端接收-响应分为三层处理
+		
+		1.Controller: 控制层。负责接收数据、响应数据。
+		2.Service: 业务逻辑层。负责处理具体的业务逻辑。
+		3.Dao: 数据访问层。负责对数据进行访问操作(包括curd)。
 	
+	分层解耦：高内聚低耦合
+		IOC：控制反转，对象的创建权由程序自身 -> 外部容器(IOC容器)
+		DI: 依赖注入，IOC容器根据自己管理的类自动为程序创建合适的类对象，
+		Bean对象: 交给IOC容器管理的类。
+		
+		实现:@Component和@Autowired
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+			-@Component：标记类，表示将这个类交给IOC容器管理。
+				衍生: 以下三个注解都可以声明一个Bean
+				1.@Controller 声明控制器对象。在spring boot集成Web开发中，只能用@Controller声明控制器。
+				2.@Service 声明Service对象
+				3.@Repository 声明Dao对象
+			细节:	
+				1.@Component("xxx")可以指定Bean对象名，默认为: 类名首字母小写: ServiceB -> serviceB
+				2.需要扫描才能生效: @ComponentScan：对范围内的@Component进行扫描，并将其加入IOC容器中。默认范围：当前类包及其子包。
+				3.启动类的@SpringBootApplication已经包含@ComponentScan，可以扫描启动类所在包以及子包。
+				4.手动添加(破环默认范围)@ComponentScan({"path1", "path2, ......})
+					
+			-Autowired: 标记对象，当程序运行时自动在容器中选择合适的类创建对象，并赋值。
+				@Autowired
+				Service service //= new ServiceImplB;
+				自动创建的类对象甚至会覆盖原程序中定义的类对象(ServiceImplB)
+			细节：
+				1.当IOC容器中存在多个符合条件的Bean对象会报错。
+				2.使用如下三种注解来解决：
+					-@Primary: 注解冲突类的某一个，表示使用该类。
+					-@Qualifier("Bean对象名"): 与@Autowired一起使用，表示使用该类Bean对象。
+					-@Resource(name="Bean对象名"): 单独使用，不需要@Autowired，表示使用该类Bean对象。
+				经过测试:优先级 @Resource>@Qualifier>@Primary			
+					
+				@Qualifier与@Resource区别:
+					1.前者spring框架提供的注解，后者是JDK提供的注解。
+					2.前者默认是按照类型注入，后者默认是按照名称注入。
+					
+
+		
+		
 	
 	
 	
