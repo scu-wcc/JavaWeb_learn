@@ -513,15 +513,162 @@ SpringBoot的起步依赖内嵌了Tomcat服务器
 					1.前者spring框架提供的注解，后者是JDK提供的注解。
 					2.前者默认是按照类型注入，后者默认是按照名称注入。
 					
+14.SQL数据库
+	
+	建表字段约束:	非空约束	唯一约束	主键约束	 默认约束	 外键约束
+					not null     unique	   primary key   default    foreign key
+		
+	数据类型:大致分三类: 
+		数值类型：主要使用: tinyint\int\double （double(n,m):一共n位，有m位小数）
+		
+		字符串类型：主要使用: char(n),varchar(n)
+			char(n):定长字符串,无论存入的值是多少(<n)，都占据n个字节。
+			varchar(n):变长字符串，根据存入的字符串大小(<n)分配内存空间。
+			
+		日期类型：主要使用: date:日期/ datetime: 日期+时间
+		
+	修改表结构: alter table 表名 对应操作; 	
+		
+	对表中数据进行CURD：
+		添加数据: insert into table_name(...... ) values(...... )
+			-字符串和日期类型需要使用单引号引起来。
+			-values中的值要与table_name()中的字段一一对应。
+		
+		修改(更新)数据: update table_name set column1=value1 [, column2 = value2......] [where 条件];
+			-不设置条件的话会修改整张表的该字段的值。
+		
+		删除数据: delete from table_name [where 条件];
+		-如果不指定条件，删除整个表中数据。
+		
+		查询数据: select column [as 别名] from table_name [where [group by [having [ order by[ limit]]]]]
+			条件查询:
+				比较特殊的符号:between...and... \ like '_%' \ in(......) \ is null \ and与&& \ or与|| \ not与! \ !=与<>
+			
+		聚合函数:
+			使用:函数名(字段名)。
+			聚合函数会忽略值为null的字段。
+			
+		分组:group by
+			-分组后查询数据显示的字段值只有 分组字段 和 聚合函数 才有意义。
+		
+		where与having的区别
+			-执行时机: where在分组前执行，having在分组后执行。
+			-对聚合函数判断: where不可对聚合函数进行条件判断，having可以使用聚合函数进行条件判断。
+		
+		排序查询: order by 字段1 排序方式1, 字段2 排序方式2......
+			-排序方式: asc 默认，升序； desc 降序。
+			-按照字段顺序规定优先级：左 -> 右
+	
+		分页查询: limit 起始索引, 每页展示记录数。
+		
+		流程控制语句:
+			if(条件, true:值1, false:值2) [as 字段别名]	
+				-select if(gender=1, '男性员工', '女性员工') 性别, count(*) 人数 from tb_emp group by gender;
+			
+			case 表达式 when 值1 then 结果1 [when 值2 then 结果2......] [else result]/*所有值都不匹配，返回result*/ end
+				case开始，end结尾。
+				-select (case job
+					when '1' then '班主任'
+					when '2' then '讲师'
+					when '3' then '教研主管'
+					when '4' then '学工主管'
+					else '无职位分配' end
+					)  职位, count(*)
+				from tb_emp
+				group by job;
+	
+15.多表设计
+	
+	一(父表/主表)对多(子表): 使用物理外键(使用SQL语句生成实际的外键绑定双表关系)缺点较大，建议使用逻辑外键:在业务处理层面通过代码来保证数据的一致性和完整性。
+	
+	一对一:任意一张表使用外键关联另一张表保证数据的一致性和完整性，并且为了保证一对一关系，可以给外键字段添加unique约束。
+	
+	多对多: 使用中间表以及两个外键字段分别关联两张表的主键。
+	
+16.	多表联查
 
-		
-		
+	内连接:查询交集部分
+		-隐式内连接: from t1 , t2 where
+		-显示内连接: from t1 [inner] join t2 on 条件
 	
+	外连接:查询交集部分以及左/右表所有数据
+		-左外连接: from t1 left [outer] join t2 on 条件
+		-右外连接: from t1 right [outer] join t2 on 条件
+		！外连接要配合where使用: ON判断后无论左/右表是否符合条件都会返回全部内容，此时要使用WHERE来进一步筛选。
 	
+	子查询:按照查询返回结果可以分为四类
+		-标量子查询:返回的结果是单个值，可以作为条件判断的值。
+		-列子查询:返回的结果是单列(可以多行)，配合in\not in来使用。
+		-行子查询:返回的结果是单行(可以是多列)，可以配合=、<>、in、not in使用。
+		-表子查询:返回的结果是一个表，可以在from中作为临时表使用，也可以在条件中配合in/not in使用。
 	
+17.事务：在同一个事务中的操作，要么同时成功，要么同时失败。
+
+	开启事务: start transaction; / begin;
+	提交事务: commit;
+	回归事务: rollback;
 	
+	事务的四大特性:ACID: 原子性，一致性，隔离性，持久性。
+
+18.索引: 高效查询数据的数据结构
+
+	MySQL默认使用B+Tree结构创建索引。
+	B+Tree：1.一个节点可以有多个key(有N个Key就有N个指针)；
+			2.所有数据都存储在叶子节点中，非叶子节点只存储key值和指针。
+			3.叶子节点之间形成双向链表
 	
+	语法: 创建、查看、删除
+	创建: create [unique] index 索引名 on 表名(column[,column2,.....]);
+	查看: show index from 表名;
+	删除: drop index 索引名 on 表名;
+
+19.Mybatis: 用于Dao(Mapper)层，简化JDBC的开发
+
+	1.创建sprintboot工程，引入MYSQL\MYBATIS依赖
+	2.配置Mybatis相关信息
+	3.编写SQL语句(注解/XML)
+
+简单的Mybatis程序:
+
+	1.配置连接数据库的四要素:驱动、主机名、用户、密码、连接的url
+	2.创建pojo类，使用对象接收查询数据库返回的数据。
+	3.创建mapper层(dao层),创建接口，使用@Mapper注解，在接口中定义接口，选择要使用的SQL语句，比如@Select()
+		-@Mapper:运行时，自动生成该接口的实现类对象(代理对象)，并添加到IOC容器中管理。
+		-@Select("select ......")：当前执行的是查询语句select
+	4.进行单元测试:@SrpingBootTest：自动加载整个SpringBoot环境，并创建IOC容器。
+
+20.JDBC：Java操作关系型数据的规范(接口)，由数据库厂商提供数据库驱动(Driver)实现。
+   MyBatis是对原生JDBC的封装，优化了JDBC硬编码、繁琐、资源浪费降低性能的问题。
+
+21.数据库连接池：dataSource: JAVA提供的数据库连接池接口。
 	
+	一种容器，管理数据库连接Connection对象
+	优势:
+		1.实现连接资源重用，避免资源浪费。
+		2.提升系统的响应时间。
+		3.设置闲置事件，避免连接泄露。
+
+	实现类(依赖)：目前最流行成熟的数据库连接池: Druid(阿里的)\Hikari(spring默认)
+
+22.lombok依赖:一个实用的Java类库，可以通过注解自动生成构造器、get/set等一系列方法。
+
+	@Data = @Getter+@Setter+@ToString+@EqualsAndHashCode
+	@NoArgsConstructor: 为实体类生成无参构造.
+	@AllArgsConstructor: 为实体类生成带全部参数的构造.
 	
-	
+<img height="333" src="img/Lombok.png" width="999"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
