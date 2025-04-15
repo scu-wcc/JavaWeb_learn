@@ -634,7 +634,8 @@ SpringBoot的起步依赖内嵌了Tomcat服务器
 	2.创建pojo类，使用对象接收查询数据库返回的数据。
 	3.创建mapper层(dao层),创建接口，使用@Mapper注解，在接口中定义接口，选择要使用的SQL语句，比如@Select()
 		-@Mapper:运行时，自动生成该接口的实现类对象(代理对象)，并添加到IOC容器中管理。
-		-@Select("select ......")：当前执行的是查询语句select
+		-@Select("select ......")：当前执行的是查询语句select，查询返回的结果封装在对象(对象集合)中
+		
 	4.进行单元测试:@SrpingBootTest：自动加载整个SpringBoot环境，并创建IOC容器。
 
 20.JDBC：Java操作关系型数据的规范(接口)，由数据库厂商提供数据库驱动(Driver)实现。
