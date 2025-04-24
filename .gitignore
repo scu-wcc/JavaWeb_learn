@@ -1,3 +1,4 @@
 # aliyun
 
-day09/tlias-web-management/src/main/resources/application.yml
+*.yml
+*.properties
