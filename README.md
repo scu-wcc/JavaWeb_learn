@@ -632,7 +632,7 @@ SpringBoot的起步依赖内嵌了Tomcat服务器
 
 	1.配置连接数据库的四要素:驱动、主机名、用户、密码、连接的url
 	2.创建pojo类，使用对象接收查询数据库返回的数据。
-	3.创建mapper层(dao层),创建接口，使用@Mapper注解，在接口中定义接口，选择要使用的SQL语句，比如@Select()
+	3.创建mapper层(dao层),创建接口，使用@Mapper注解，在接口中定义方法，选择要使用的SQL语句，比如@Select()
 		-@Mapper:运行时，自动生成该接口的实现类对象(代理对象)，并添加到IOC容器中管理。
 		-@Select("select ......")：当前执行的是查询语句select，查询返回的结果封装在对象(对象集合)中
 		
@@ -657,11 +657,275 @@ SpringBoot的起步依赖内嵌了Tomcat服务器
 	@NoArgsConstructor: 为实体类生成无参构造.
 	@AllArgsConstructor: 为实体类生成带全部参数的构造.
 	
+	Lombok并不会改变源码文件，而是在编译阶段根据注解动态生成和修改字节码。
+	
 <img height="333" src="img/Lombok.png" width="999"/>
 
+23.Mybatis一些特殊用法
+
+	1.预编译sql：在sql中使用#{Param}动态接收参数，在传递sql给数据库时sql语句该位置为 ? 占位符。数据库执行sql时会将参数替换 ?。
+	
+		1.提高性能:由于数据库会将sql语句缓存，使用具体的参数会导致每次都是不一样的语句，从而缓存失效。
+		2.防止sql注入: 如果传递直接拼接好的sql，可能导致恶意注入。
+		  而预编译sql会先生成语法树，再将传递的参数替换 ?, 此时参数无法参与语法树的构建，只作为普通参数。 
+	
+	2.当sql语句中参数较多，可以使用对象传递参数
+	
+		@Insert("insert into emp(username, name, gender, image, job, entrydate, dept_id, create_time, update_time)" +
+            "VALUES(#{username},#{name},#{gender},#{image},#{job},#{entrydate},#{deptId},#{createTime},#{updateTime})")
+		public void insert(Emp emp);
+		
+		预编译: Preparing: insert into emp(username, name, gender, image, job, entrydate, dept_id, create_time, update_time)VALUES(?,?,?,?,?,?,?,?,?)
+		要注意，传递的变量必须是对象中存在的同名成员变量。
+
+	3.返回主键:自动将生成的主键返回并封装
+		@Insert()上添加:@Options(keyProperty = "id",useGeneratedKeys = true)
+						keyProperty：要将返回的主键封装到哪个属性值(成员变量)；
+						useGeneratedKeys：是否返回自增的主键。  
+	
+	4.自动封装:使用对象可以封装select返回的字段，但字段找不到同名的成员变量，则该字段就不会封装。
+	
+		解决方法:
+			1.在select语句中给字段起别名，使得该别名与成员变量名一致：dept_id as deptId;
+			2.使用@Results/@Result手动映射:
+				@Results({
+					@Result(column="dept_id", property="deptId"),
+					......
+					})
+			（推荐）3.在配置文件中配置Mybatis开启自动通过驼峰命名规则映射：数据库字段名 a_column -> Java属性名 aColumn。
+
+	5.模糊匹配:使用模糊匹配时like '%#{name}%'无法运行，因为占位符?不能在''中执行，数据库无法使用参数填充。
+		
+		解决方法：
+			1.使用${}将拼接好的sql直接传给数据库；但会导致sql注入。
+			2.使用concat(str1,#{name},str2)拼接字符串，数据库自动识别函数concat(str1,?,str2)，获取参数填充并拼接。
+
+24.通过XML映射配置sql语句(比注解更适应复杂的sql语句)
+	
+	1.在resource文件夹下配置与Java资源包同级同名的mapper包，将与mapper.java同名的xml文件放置在这个文件夹下。
+	2.配置xml的配置信息。
+	3.在<mapper>中配置namespace属性，属性值是mapper接口的全限定类名。
+	4.选择sql标签，如<select>，配置id属性，属性值是接口中的方法名，然后配置返回值类型，与接口方法的返回值的单条记录封装类型相同。
+	
+	<!--设置namespace-->
+	<mapper namespace="scu.wcc.mapper.EmpMapper">
+	<!--设置sql语句-->
+		<select id="conditionSelect" resultType="scu.wcc.pojo.Emp">
+			select * from emp where name like concat('%',#{name},'%') and gender = #{gender}
+		</select>
+	</mapper>
+	
+XML与注解在配置SQL语句的差别:XML可以配置复杂的sql，而注解可以使得sql语句看起来更加简洁高效。
+
+25.动态SQL:SQL语句随着外部输入/系统运行发送变化，与XML映射配套使用更好。
+	
+	1.<if test=""true/false>xxxxx </if>：当test的属性值为true才会将xxx拼接到sql语句之后。
+	2.<where><if>......</if></where>: where中至少有一个子标签成立，才会拼接where，并且自动去除第一个条件前面的and/or，保证sql语法正确。
+	3.<set><if>......</if></set>: 在执行update时，set会判断是否有if成立，如果有至少一个子标签成立，才会拼接set，并且会自动去除最后一个字段的',' 保证sql语法的正确。
+	
+		<set>
+			<if test="name!=null">
+				name=#{name},
+			</if>
+		
+		</set>
+		
+		<where>
+            <if test="name != null">
+                and name like concat('%', #{name}, '%')
+            </if>
+        </where>
+	
+	4.<foreach>:用于批量操作
+	<delete id="deleteByIds">
+        delete from emp where id in
+		<--! 
+			collection: 要遍历的集合名(方法传递进来的参数)
+			item: 遍历出来的单个元素名
+			separator: 拼接元素时用什么符号间隔
+			close: 循环结束后拼接的片段
+			open: 循环开始前拼接的片段
+		-->
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+	
+	5.sql语句复用: <sql>与<include>
+		<sql id="给这段sql语句起一个唯一id">
+			sql语句
+		</sql>
+		......
+		
+		其他sql语句中插入<include refid="对应的sql语句id"/>
+
+26.Rest风格：使用HTTP动词来描述方法
+	
+	-GET:查询
+	-POST:新增
+	-PUT:修改
+	-DELETE:删除
+	
+27.springboot中对应的方法注解
+	
+	@RequestMapping(value = "/depts",method = RequestMethod.GET) //指定只接受GET请求
+	等价于
+    @GetMapping("/depts")
+
+	@RequestParam(defaultValue=")：不仅可以映射，设置是否需要传递，还可以设置参数的默认值。
+
+28.PageHelper:简化分页查询
+
+	Mapper: 只需要设置@Select("select * from emp");
+	Service:1.设置PageHelper.startPage(page,pageSize)。
+		    2.执行Mapper，此时PH自动识别sql语句，替换成：select count(0) from emp;
+														 select * from emp limit ?,?;
+				返回Page<Emp>,调用Page<Emp>方法即可。
+
+29.本地存储：使用MultipartFile file 作为参数可以接收页面传来的文件，并且生成临时文件，当上传文件请求结束，这些文件会自动删除。
+	
+	步骤: 1.获取文件的拓展名
+		  2.为文件生成一个独一的UUID
+		  3.将文件保存的指定的文件中。
+
+	缺点:1.本地需要提供额外空间存储。
+		 2.如果本地出现磁盘丢失，会导致所有文件消失。
+		 3.前端无法直接访问本地访问。
+
+30.配置文件：properties的注解对yml也生效。
+
+springboot中可以使用application.yml(yaml)替换application.properties
+
+	yml:1.大小写敏感
+		2.使用: 赋值
+		3.值的前面必须有一个空格。
+		4.使用空格缩进来代表层级关系。
+		5.空格多少不重要，同一级的使用相同的空格数就行。
+		
+	yml的两种数据格式:
+		对象/Map
+		User：
+		  name:
+		  age:
+		 
+		数组/List
+		Hobby:
+		  - java
+		  - python
+		  - C++
+
+添加自己的key=value：
+	1.在配置文件中添加key=value；
+	2.在项目中变量上使用注解:@Value("${key}")  注:要使用springboot的Value。
+	3.程序自动将key对应的value赋值给变量。
+
+使用@Value一次只能配置单个变量，使用@Configuration可以一次配置多个变量：
+	
+	@ConfigurationProperties(profix="aliyun.oss") 指定前缀
+	类中还要有对应的Set方法。
+	cft会自动检查配置文件中这个前缀下有没有与类中成员变量同名的key，有就将类中成员变量赋值。
+	
+31.会话与会话跟踪
+	
+	会话技术：一次连接中可以发送多次请求和响应。
+	会话跟踪：维护服务器状态的方法，用于识别多次请求是否来自同一浏览器，以便在同一次会话的多次请求间共享数据。
+
+三种会话跟踪技术:
+	
+	1.Cookie:服务器生成一个Cookie响应给浏览器，浏览器保存在本地，本次会话的每次请求都会携带该Cookie
+		-在浏览器的响应头中addCookie(new Cookie);
+		-在浏览器的请求头中捕获Cookies;
+	优缺点：HTTP协议支持，但是移动端APP无法使用，并且可能会被客户禁用，还不能跨域使用。
+
+	2.Session:基于Cookie生成。
+		-在服务器中根据会话生成对应的Session，存储在服务器。
+		-以Cookie的形式发送给客户端。
+		-浏览器每次发送请求时在Cookie中发送对应的Session
+	优缺点：存储在服务端，比较安全。但在服务器集成环境下无法使用(每次都可能访问到不同的服务器上)，同时有着Cookie的所有缺点。
+
+	3.令牌技术：现在企业的主流方案
+		-首次请求时服务端生成令牌并响应返回
+		-此后浏览器请求时携带令牌，服务器端校验。
+	优缺点：支持PC端和移动端，解决服务器集群认证问题，并且由于令牌不存储在服务器，减轻了服务器的存储压力
+		    但令牌技术需要自己实现。
+
+JWT令牌：JSON Web Token，以JSON数据格式安全地传输信息。
+
+三个部分组成:Header、Payload、Signature
+
+	Header: 记录令牌的类型、算法签名等，并通过Base64算法生成头字符串
+	Payload: 携带自定义信息、默认信息，并通过Base64算法生成有效载荷部分字符串
+	Signature：通过Headerhe Payload和指定密钥，通过指定的签名算法计算生成。
+
+    String jwt = Jwts.builder() //指定当前动作:生成JWT令牌
+            .setClaims(claims) //添加自定义载荷
+		    .setExpiration(new Date(System.currentTimeMillis()+12*3600*1000)) //指定令牌的过期时间	
+            .signWith(SignatureAlgorithm.HS256,"itheima") //指定令牌的签名算法和签名
+            .compact(); //生成令牌
+
+	Claims claims = Jwts.parser() //指定当前动作: 对令牌解密
+            .setSigningKey("itheima")// 输入密钥。
+            .parseClaimsJws("") //输入JWT令牌。
+            .getBody(); //获取自定义载荷部分。
+
+32.过滤器：Filter过滤器，可以拦截资源请求，从而实现特殊功能
+
+	1.自定义Filter类，实现Filter接口，设置要拦截的路径@WebFilter(urlPatterns="")
+	2.在启动类上添加@ServletComponentScan，使用JavaWeb的Filter组件。
+	3.重写Filter接口:
+		init：初始化方法，只执行一次。
+		destory：销毁方法，只执行一次。
+		doFilter：拦截请求方法，多次调用；
+			chain.doFilter(request, response):放行方法，传入请求和响应对象，访问请求的资源。
+
+拦截流程：
+	
+	拦截到设置的请求路径 -> 执行放行前的逻辑 -> 调用FilterChain.doFilter请求Web资源 -> 返回Filter，执行放行后的逻辑。
+	Filter -> Web资源 -> Filter	
+		
+过滤器链:一个Web应用中，配置了多个过滤器，形成过滤器链。
+
+	执行顺序:init，destory方法一起执行。
+	doFilter：根据过滤器类名字母顺序执行
+		filter1放行前逻辑 -> filter2放行前逻辑 ->......(没有过滤器了)
+		-> Web资源 -> filter2放行后逻辑 -> filter1放行后逻辑。
+	
+33.拦截器 Interceptor，springboot提供的一种类似过滤器的动态拦截调用机制。
+
+	1.定义拦截器：实现HandlerInterceptor接口，重写其所有方法
+		-preHandle:目标资源方法执行前执行，返回true放行，返回false不放行。
+			(在这个方法判断是否要放行)
+			
+		-postHandle:目标资源方法执行后执行。
+		-afterCompletion：视图渲染完毕后执行，最后执行。
+
+	2.注册拦截器: @Configuration定义配置类,实现WebMvcConfigurer接口
+		在配置类中重写addInterceptor方法，注册拦截器
+		registry.addInterceptor(拦截器对象).addPathtterns(拦截路径)[.excludePathPatterns(不需要拦截的路径)];
+		
+拦截器的路径规范："/*" 表示只接收任意的一级路径。"/**" 表示接收任意及路径。
 
 
+过滤器与拦截器的区别：
+    
+    1.范围：过滤器Filter可以拦截所有资源，而拦截器Interceptor只会拦截Spring中的资源。
+    2.接口范围：过滤器需要实现Filter接口，而拦截器需要实现HandlerInterceptor接口。
 
+<img height="400" src="img/过滤器和拦截器.png" width="800"/>
+
+34.异常处理
+	
+	当服务器出现异常时，异常会随着调用方法返回上一级直至浏览器，此时返回的异常不符合开发规范。
+	处理方法：1.每个Controller添加try-catch。代码臃肿，重复。
+			  2.使用全局异常处理器。简单，高效。
+			  
+全局异常处理器@RestControllerAdvice:
+	
+	1.定义一个类，实现@RestControllerAdvice注解，该注解可以捕获异常。
+	2.定义处理异常的方法，实现@ExceptionHandler(异常类名.class)
+			  
+	细节：@RestControllerAdvice=ControllerAdvice + ResponseBody,会将返回对象转成JSON类型。
+	      异常方法类中接收异常参数getException(Exception e)：该参数自动传入。
 
 
 
