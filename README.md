@@ -924,10 +924,11 @@ JWT令牌：JSON Web Token，以JSON数据格式安全地传输信息。
 	1.定义一个类，实现@RestControllerAdvice注解，该注解可以捕获异常。
 	2.定义处理异常的方法，实现@ExceptionHandler(异常类名.class)
 			  
-	细节：@RestControllerAdvice=ControllerAdvice + ResponseBody,会将返回对象转成JSON类型。
+	细节：@RestControllerAdvice=@ControllerAdvice + @ResponseBody,会将返回对象转成JSON类型。
 	      异常方法类中接收异常参数getException(Exception e)：该参数自动传入。
 
-
+@ControllerAdvice：该注解标志着一个类可以为所有的 @RequestMapping 处理方法提供通用的异常处理和数据绑定等增强功能。
+当应用到一个类上时，该类中定义的方法将在所有控制器类的请求处理链中生效。
 
 
 
