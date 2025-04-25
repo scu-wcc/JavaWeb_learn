@@ -1,6 +1,7 @@
 package org.example.mapper;
 
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.example.pojo.Emp;
@@ -35,4 +36,7 @@ public interface EmpMapper {
 
     @Select("select * from emp where username=#{username} and password=#{password}")
     Emp getUserByUsernameAndPassword(Emp emp);
+
+    @Delete("delete from emp where dept_id=#{deptId}")
+    void deleteByDeptId(Integer deptId);
 }

@@ -2,6 +2,7 @@ package org.example.controller;
 
 
 
+import org.example.anno.Log;
 import org.example.pojo.Dept;
 import org.example.pojo.Result;
 import org.example.service.DeptService;
@@ -30,6 +31,7 @@ public class DeptController {
         return Result.success(deptList);
     }
 
+    @Log
     @DeleteMapping("/{id}")
     public Result deptDelete(@PathVariable Integer id){
 
@@ -39,6 +41,7 @@ public class DeptController {
         return Result.success("success");
     }
 
+    @Log
     @PostMapping
     public Result deptInsert(@RequestBody Dept dept){
 
@@ -47,6 +50,7 @@ public class DeptController {
         return Result.success();
 
     }
+
 
     @GetMapping("/{id}")
     public Result getById(@PathVariable Integer id){
@@ -58,6 +62,7 @@ public class DeptController {
        return Result.success(dept);
     }
 
+    @Log
     @PutMapping
     public Result update(@RequestBody Dept dept){
 

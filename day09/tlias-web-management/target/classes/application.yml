@@ -28,3 +28,7 @@ aliyun:
     accessKeySecret: 2DW1r7gv6e8tM00Kdt7r0PavvEehJJ
     bucketName: heima-web-learn
 
+#spring事务管理日志
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug

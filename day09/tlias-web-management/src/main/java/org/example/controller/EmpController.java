@@ -2,6 +2,7 @@ package org.example.controller;
 
 
 import jakarta.websocket.server.PathParam;
+import org.example.anno.Log;
 import org.example.pojo.Emp;
 import org.example.pojo.PageBean;
 import org.example.pojo.Result;
@@ -35,6 +36,7 @@ public class EmpController {
        return Result.success(pageBean);
     }
 
+    @Log
     @DeleteMapping("/{ids}")
     public Result delete(@PathVariable List<Integer> ids){
 
@@ -42,6 +44,7 @@ public class EmpController {
         return Result.success();
     }
 
+    @Log
     @PostMapping
     public Result insert(@RequestBody Emp emp){
 
@@ -59,6 +62,7 @@ public class EmpController {
         return Result.success(emp);
     }
 
+    @Log
     @PutMapping
     public Result update(@RequestBody Emp emp){
         empService.update(emp);

@@ -903,7 +903,7 @@ JWT令牌：JSON Web Token，以JSON数据格式安全地传输信息。
 		在配置类中重写addInterceptor方法，注册拦截器
 		registry.addInterceptor(拦截器对象).addPathtterns(拦截路径)[.excludePathPatterns(不需要拦截的路径)];
 		
-拦截器的路径规范："/*" 表示只接收任意的一级路径。"/**" 表示接收任意及路径。
+拦截器的路径规范："/*" 表示只接收任意的一级路径。"/**" 表示接收任意级路径。
 
 
 过滤器与拦截器的区别：
@@ -929,6 +929,112 @@ JWT令牌：JSON Web Token，以JSON数据格式安全地传输信息。
 
 @ControllerAdvice：该注解标志着一个类可以为所有的 @RequestMapping 处理方法提供通用的异常处理和数据绑定等增强功能。
 当应用到一个类上时，该类中定义的方法将在所有控制器类的请求处理链中生效。
+
+35.事务管理:使用@Transactional注释方法、类、接口，表示将其交给spring进行事务管理。
+	
+	方法执行前：开启事务；
+	方法执行完毕：提交事务；
+	方法执行时出现异常：回滚事务。
+
+默认情况下，只有出现RuntimeException类型异常才回滚，导致出现其他类型异常时不回滚。
+	
+	使用rollbackFor属性指定要回滚的异常类型:@Transactional(rollbackFor = Exception.class)
+
+事务的传播行为：propagation控制多个事务之间的关系。
+	
+	默认属性：REQUIRED，当前方法需要事务，如果存在事务则加入当前事务，没有则创建新事务。
+	该属性会将所有需要事务的操作放到同一个事务中，一起提交，一起回滚。
+	
+	其他属性(常用)：REQUIRES_NEW，当前操作需要事务，并且无论是否存在事务，都要开启新事务来执行当前操作。
+	该属性会将旧事务挂起，先执行新事务，直到新事务提交后，再继续执行挂起的事务。
+	使用场景: 执行某些操作后，无论是否成功，都需要将操作记录到日志中，此时日志必须记录成功。
+	
+36.AOP：spring框架的第二大核心，面向切面(特定方法)编程，通过动态代理实现是最主流的方法。
+
+	1.引入AOP依赖。
+	2.编程AOP程序。
+	以AOP记录方法耗时为例:
+		@Component //注册为Bean对象，交给IOC容器管理。
+		@Aspect //表示该类为AOP类
+		public class TimeAspect {
+
+		@Around("execution(* org.example.service.*.*(..))") //指定返回值类型，方法生效的范围
+		public Object recordTime(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+			//原方法运行前执行
+			long start = System.currentTimeMillis();
+
+			//执行原方法, 获取原方法的返回值
+			Object result = proceedingJoinPoint.proceed(); //调用原始方法
+
+			//原方法执行后执行
+			long end = System.currentTimeMillis();
+			Long time = end - start;
+			log.info(proceedingJoinPoint.getSignature()+"执行耗时："+time+"ms");
+
+			//返回原方法的返回值
+			return result;
+		}
+
+使用AOP进行开发，在调用目标时，实际上调用的是目标的代理对象。
+
+通知类型:
+	
+	1.@Before: 该方法在目标方法执行前执行。
+	2.@After: 该方法在目标方法执行后执行，而且是一定执行。
+	3.@AfterReturning: 当目标方法正常执行结束后执行。
+	4.@AfterThrowing: 目标方法抛出异常后执行。
+	5.※@Around：环绕方法，在目标方法执行前、后都可以执行，而且必须要调用目标方法，返回其返回值。
+
+不同的切面类中，同种通知的执行顺序:由切面类的类名决定，或者使用@Order(number)决定。@Before先执行的切面类，其@After就后执行。
+
+@PointCut("execution(* org.example.service.*.*(..))")：修饰方法。抽取公共切点表达式，当其他通知需要使用时:@Around("方法名()")
+切入点表达式: execution 和 @annotation
+
+execution(访问修饰符? 返回值 包名.类名.?方法名(方法参数类) throws 异常?) 
+	
+	-?：可以省略
+	-*：通配符，匹配单个独立的符号。
+	-..：通配符，可以匹配任意个符号。
+	-可以使用 || && !来组合复杂的切入点表达式。
+ 
+@annotation("注解全类名): 对使用该注解标识的方法生效
+
+连接点: AOP中指能被AOP控制的方法。SpringAOP中特指方法的执行
+
+	获取连接点信息(获取目标方法信息):
+		-@Around: 只能使用 ProceedingJoinPoint
+		-其他通知: 只能使用 JoinPoint,其为PJP的父类型。
+		获取信息的方法相同，只是调用的对象不同。
+
+37.关于@Autowired
+	@Autowired
+	HttpServletRequest request; //运行目标方法时自动注入当前的httpRequest
+	
+    1.HttpServletRequest在切面初始化时注入一个代理对象，
+	  每次目标方法调用时，该代理动态获取当前请求的真实实例，确保每次操作记录的是正确的请求信息。
+	  
+	2.每次调用该代理对象的方法时（如request.getHeader()），代理会委托给当前线程绑定的实际HttpServletRequest实例。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

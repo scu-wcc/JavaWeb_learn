@@ -27,7 +27,6 @@ public class LoginInterceptor implements HandlerInterceptor {
             String notLogin = JSONObject.toJSONString(error);
             //将JSON化的对象写入响应数据中
             res.getWriter().write(notLogin);
-
             return false;
         }
 
