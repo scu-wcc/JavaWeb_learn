@@ -769,8 +769,7 @@ XML与注解在配置SQL语句的差别:XML可以配置复杂的sql，而注解�
 27.springboot中对应的方法注解
 	
 	@RequestMapping(value = "/depts",method = RequestMethod.GET) //指定只接受GET请求
-	等价于
-    @GetMapping("/depts")
+	等价于@GetMapping("/depts")
 
 	@RequestParam(defaultValue=")：不仅可以映射，设置是否需要传递，还可以设置参数的默认值。
 
@@ -853,7 +852,7 @@ JWT令牌：JSON Web Token，以JSON数据格式安全地传输信息。
 
 三个部分组成:Header、Payload、Signature
 
-	Header: 记录令牌的类型、算法签名等，并通过Base64算法生成头字符串
+	Header: 记录令牌的类型、签名算法等，并通过Base64算法生成头字符串
 	Payload: 携带自定义信息、默认信息，并通过Base64算法生成有效载荷部分字符串
 	Signature：通过Headerhe Payload和指定密钥，通过指定的签名算法计算生成。
 
@@ -1015,24 +1014,81 @@ execution(访问修饰符? 返回值 包名.类名.?方法名(方法参数类) t
 	  
 	2.每次调用该代理对象的方法时（如request.getHeader()），代理会委托给当前线程绑定的实际HttpServletRequest实例。
 
+38.springboot原理
+	
+	1.配置优先级：高到低
+		命令行参数: --xxx=xxx
+		Java系统属性: -Dxxx=xxx
+		.properties
+		.yml
+		.yaml
+	
+	2.Bean管理(自己定义的类使用@Component及其衍生注解，第三方类使用@Bean)
+		2.1Bean对象获取:1.获取IOC容器ApplicationContext对象
+						2.调用getBean()方法，获取Bean对象。
+						
+		2.2Bean的作用域@Scope，默认为singleton
+			-singleton单例: 容器启动时创建(使用@Lazy注解来延迟初始化至第一次使用)，每次获取该Bean对象都是同一个。
+			-prototype非单例：每次使用该bean都会创建一个新的实例。
+			-request\session\application：Web环境中，对应范围内创建新的实例。
+			
+		2.3第三方Bean:第三方类无法使用@Component来声明交给IOC容器管理时，使用@Bean
+			-创建@Configuration类统一管理
+			-使用@Bean注释方法：该方法的返回值实例交给IOC容器统一管理。
+								通过返回第三方类的实例完成依赖反转。
+			-使用@Bean获取的bean对象的名称为: 获取该bena的方法名。使用value/name属性名可以修改。
+			-当第三方bean需要依赖其他bean对象，直接在bean定义方法的形参中声明即可，容器会自动注入(不需要@Autowired)。
+		
+SpringBoot原理:简化了SpringFramework开发的难度。
+	
+	-起步依赖(原理:Maven的依赖传递): 原生Spring开发需要引入大量依赖，并且依赖的版本号也会影响项目的开发。
+			   SpringBoot使用起步依赖，只需要导入一个起步依赖，根据Maven的依赖传递，会自动导入所需的相关依赖。
+	
+	-自动配置：当启动spring容器后，一些配置类、bean对象自动存入IOC容器，不需要手动声明。
+		原理:1.使用@ComponentScan规定要扫描的包，将扫到的组件交给IOC容器。这样的做法臃肿，低效。
+		
+			 2.使用@Import()规定要加载到IOC容器的类。通过@Import导入的类甚至不需要@Component规定。
+				-直接在当前项目的启动类上规定导入类(普通类、配置类、ImportSelector接口的实现类)。
+				 这种做法不太现实，需要我们自己去找需要导入的包。
+				 
+				-第三方工具使用@Enablexxxx注解，封装@Import，在启动类上直接使用@Enablexxx。
+				 由第三方直接规定需要导入的包，我们只需要使用@Enablexxxx注解。
+
+@SpringBootApplication注解:
+	
+	封装了以下这三个注解:
+		-@SpringBootConfiguration：表明启动类也是一个配置类。
+		-@ComponentScan：组件扫描，默认扫描当前引导类所在的包及其子包。
+		-@EnableAutoConfiguration:实现自动配置的核心注解，通过其封装的@Import，加载需要配置的bean对象。
+
+条件注入:@Conditional注解以及子注解。当前环境满足条件时才会将这个类注入到IOC容器中成为bean对象。
+	
+	常见的子注解:
+		-@ConditionalOnClass:当前环境中存在指定的这个类时，才声明该bean
+		-@ConditionalOnMissingBean: 当前不存在该类型的bean时，才声明该bean
+		-@ConditionalOnProperty: 配置文件中存在对应的键值对时，才注册bean到IOC容器中。
+
+自动配置的流程:@EnableAutoConfiguration封装@Import -> @Import导入ImportSelector的实现类
+				-> 在实现类中选择要注册到IOC容中的bean -> SpringBoot会根据@Conditional，有条件地装配。
 
 
+自定义starter:
+	
+	aliyun-oss-spring-boot-starter：
+		这个模块负责依赖管理，关联需要自动注入的配置文件，在实际引入依赖时也是引入这个模块。
+		
+	aliyun-oss-spring-boot-autoconfigure：
+		1.配置xxxxxAutoConfiguration配置文件，定义@Bean方法，返回需要注入IOC容器的bean
+		2.在resource文件夹下生成:META-INF/spring/xxxxx......xxxx.import文件，声明xxxxxAutoConfiguration文件的全类名。
+		3.在其他项目的pom.xml中导入starter依赖，启动项目，完成自动配置。
+
+@EnableConfigurationProperties(xxx.class):
+	
+	-让@ConfigurationProperties注解的类生效
+	-将该类注入到IOC容器中，交由IOC容器管理。
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+![](img/Web总结.png)
 
 
 
