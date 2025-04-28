@@ -1087,16 +1087,65 @@ SpringBoot原理:简化了SpringFramework开发的难度。
 	-让@ConfigurationProperties注解的类生效
 	-将该类注入到IOC容器中，交由IOC容器管理。
 
+<img height="400" src="img/Web总结.png" width="800"/>
 
-![](img/Web总结.png)
+39.Maven高级
 
+--分模块设计:将项目按照功能拆分成若干子模块，方便项目的维护、管理、扩展，以及各模块之间相互调用，资源共享。
 
+--常见的打包方式: 
+	
+	1.jar:普通模块打包，springboot项目默认的打包方式，内嵌tomcat，可以直接通过jar运行。
+	2.war:普通web程序打包，需要部署在外部的tomcat服务器运行。
+	3.pom:父工程或聚合工程，该模块不写代码，只进行依赖管理。
 
+--继承:Maven项目可以实现继承关系，与Java一样，单继承，多重继承。
 
+	1.创建父工程，设置打包方式<packaging>pom</packaging>
+	2.在子工程中配置继承关系<parent>......</parent>，使用<relativePath>指定父工程的pom.xml文件的相对位置。
+	3.在父工程中配置共有依赖(如果子工程配置了同一依赖的不同版本，那么以子工程的版本为准。)
 
+--版本管理:<dependencyManagement>标签，统一管理依赖版本，不会直接引入依赖，子工程还需要自己引入依赖(无需指定版本)。
+	
+	<dependencyManagement>
+        <dependencies>
+            <dependency>......</dependency>
+		</dependencies>
+	<dependencyManagement>
+	
+<dependencyManagement>与<dependencies>:前者只管理版本，无法被继承；后者可以被继承。
 
+--自定义属性:<properties>，类似与定义成员变量，在这个标签中定义，就可以在别的地方使用。
 
+	定义:
+	<properties>
+		<java.version>17</java.version>
+		......
+	</properties>
 
+	使用:
+	<xxxx> ${java.version} </xxxx>
 
+--聚合:快速构建项目。通过聚合工程将相关模块聚合到一起构建，不需要一个一个地构建。
+	
+	在聚合工程(一般是父工程)中引入
+	<modules>
+		<module>工程的相对地址 </module>
+		......
+	</modules>
+	
+--私服:特殊的远程仓库。由于中央仓库全球唯一，普通人无法上传共享自己的资源，所以要使用私服来代理中央仓库。
+	
+	1.构建在局域网内部的仓库服务，改变了依赖查找顺序:
+		本地仓库 (如果没有)-> 私服 (如果没有)->中央仓库，
+		并且私服会将中央仓库查找到的依赖存储起来，便于再次查找。
+		
+	2.在本地Maven中设置访问私服的用户名和密码，资源上传的url，资源的版本，就可以上传了。
+	3.在本地Maven设置链接私服的url，就可以下载私服中的依赖了。
+<img height="400" src="img/Maven私服.png" width="800"/>	
 
+	
+	
+	
+	
 	

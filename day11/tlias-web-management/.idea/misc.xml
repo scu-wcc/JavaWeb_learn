@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="web" url="file://$PROJECT_DIR$/../aliyun-oss-spring-boot-autoconfigure/aliyun-oss-spring-boot-autoconfigure" />
+  </component>
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/../aliyun-oss-spring-boot-starter/aliyun-oss-spring-boot-starter/pom.xml" />
+        <option value="$PROJECT_DIR$/../aliyun-oss-spring-boot-autoconfigure/aliyun-oss-spring-boot-autoconfigure/pom.xml" />
+        <option value="$PROJECT_DIR$/../../../web课程资料/day14-SpringBoot原理篇/day14-SpringBoot原理篇/资料/04. 自定义starter/测试工程/springboot-autoconfiguration-test/pom.xml" />
+        <option value="$PROJECT_DIR$/../tlias-pojo/pom.xml" />
+        <option value="$PROJECT_DIR$/../utils/pom.xml" />
+        <option value="$PROJECT_DIR$/../tlias-parent/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="17" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>

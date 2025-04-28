@@ -1,0 +1,14 @@
+-------------------------------------------------------------------------------
+Test set: org.example.TliasWebManagementApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.284 s <<< FAILURE! -- in org.example.TliasWebManagementApplicationTests
+org.example.TliasWebManagementApplicationTests.parseJWT -- Time elapsed: 0.022 s <<< ERROR!
+io.jsonwebtoken.ExpiredJwtException: JWT expired at 2025-04-24T18:34:23Z. Current time: 2025-04-28T14:35:06Z, a difference of 331243678 milliseconds.  Allowed clock skew: 0 milliseconds.
+	at io.jsonwebtoken.impl.DefaultJwtParser.parse(DefaultJwtParser.java:385)
+	at io.jsonwebtoken.impl.DefaultJwtParser.parse(DefaultJwtParser.java:481)
+	at io.jsonwebtoken.impl.DefaultJwtParser.parseClaimsJws(DefaultJwtParser.java:541)
+	at org.example.TliasWebManagementApplicationTests.parseJWT(TliasWebManagementApplicationTests.java:38)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
